@@ -5,53 +5,42 @@
 # Define server logic required to draw a histogram
 function(input, output) {
   
-  # User inputs
-  
-  replicateN <- reactive({
-    input$replicateN
-  })
-  
-  subjects <- reactive({
-    input$subjects
-  })
-  
-  treatDoses <- reactive({
-    treatDoses <- input$treatDoses
-    treatDoses <- paste("c(", treatDoses, ")")
-    eval(parse(text = treatDoses))
-  })
-  
-  conCovNames <- reactive({
-    input$conCovNames
-  })
-  
-  conCovMean <- reactive({
-    conCovMean <- input$conCovMean
-    conCovMean <- paste("c(", conCovMean, ")")
-    eval(parse(text = conCovMean))
-  })
-  
-  conCovVCov <- reactive({
-    conCovVCov <- input$conCovVCov
-    conCovVCov <- paste("c(", conCovVCov, ")")
-    indiv <- eval(parse(text = conCovVCov))
-    indiv^2
-  })
-  
-  conCovCrit <- reactive({
-    input$conCovCrit
-  })
+
   
   output$generate <- renderText({
     
-    go <- try(generateData( replicateN = replicateN(), 
-                            subjects = subjects(), 
-                            treatDoses = treatDoses(), 
-                            conCovNames = conCovNames(), 
-                            conCovMean = conCovMean() , 
-                            conCovVCov = conCovVCov() , 
+    # User inputs
+    
+    replicateN <- input$replicateN
+    subjects <- input$subjects
+    
+    
+    treatDoses <- input$treatDoses
+    treatDoses <- paste("c(", treatDoses, ")")
+    treatDoses <- eval(parse(text = treatDoses))
+    
+    conCovNames <- input$conCovNames
+    
+    conCovMean <- input$conCovMean
+    conCovMean <- paste("c(", conCovMean, ")")
+    conCovMean <- eval(parse(text = conCovMean))
+    
+    conCovVCov <- input$conCovVCov
+    conCovVCov <- paste("c(", conCovVCov, ")")
+    conCovVCov <- eval(parse(text = conCovVCov))
+    conCovVCov <- conCovVCov^2
+    
+    
+    conCovCrit <- input$conCovCrit
+    
+    go <- try(generateData( replicateN = replicateN, 
+                            subjects = subjects, 
+                            treatDoses = treatDoses, 
+                            conCovNames = conCovNames, 
+                            conCovMean = conCovMean , 
+                            conCovVCov = conCovVCov , 
                             conCovDigits = 1, 
-                            conCovCrit = conCovCrit(), 
+                            conCovCrit = conCovCrit, 
                             genParNames = 'E0,ED50,EMAX', 
                             genParMean = c(2,50,10), 
                             genParVCov = diag( c(.5,30,10) ), 
@@ -61,7 +50,6 @@ function(input, output) {
                             respEqn = 'E0 + ((DOSE * EMAX)/(DOSE + ED50))',  
                             respVCov = 5, 
                             interimSubj = '.3,.7'))
-    
     
     if(class(go) != "try-error")
       "Done"
